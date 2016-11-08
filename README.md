@@ -1,4 +1,4 @@
-# A Simulation of Machine Language by C
+# A Simulator of Machine Language by C
 > Learning How CPU Works from beginner.
 > 
 > Start from deitel' C++ How to Program.
