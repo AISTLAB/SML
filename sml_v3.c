@@ -14,8 +14,10 @@ winxos 2016-11-11
 #define MAX_MEM 100
 int MEM[MAX_MEM] = { 0 }, ADDER = 0; //ONLY MAX_MEN MEMORY, ONE REGISTER ADDER
 
-enum { INPUT = 10, PRINT, LOAD = 20, STORE, ADD = 30, SUB, MUL, DIV, MOD, 
-	JMP = 40, JMPN, JMPZ, HALT = -1 };
+enum {
+	INPUT = 10, PRINT, LOAD = 20, STORE, ADD = 30, SUB, MUL, DIV, MOD,
+	JMP = 40, JMPN, JMPZ, HALT = -1
+};
 
 #define COLS 10
 #define TITLE_FORMAT "%6X"
@@ -66,7 +68,7 @@ void runSML() //
 	}
 	dump();
 }
-void input_code()
+int input_code()
 {
 	printf("\nEnter -1 to end input.\n\n");
 	int ct = 0, li = 0;
@@ -77,6 +79,7 @@ void input_code()
 		scanf("%d", &ct);
 		MEM[li++] = ct;
 	}
+	return li - 1;
 }
 int dir(char path[], char filter[])//list files in path with filter
 {
@@ -108,7 +111,7 @@ int split(char dst[][80], char* str, const char* spl)//for single line chars spl
 	}
 	return n;
 }
-void load_file(char file[80])//load .sml file to MEM
+int load_file(char file[80])//load .sml file to MEM
 {
 	FILE *fi;
 	int i = 0;
@@ -119,7 +122,9 @@ void load_file(char file[80])//load .sml file to MEM
 	else
 	{
 		printf("%s NOT FOUND.", file);
+		return -1;
 	}
+	return 0;
 }
 void help()
 {
@@ -134,16 +139,16 @@ void help()
 }
 void console()
 {
-	char path[2] = ".";
 	while (1)
 	{
 		printf("SML >");
 		char buf[80] = { 0 };
 		gets_s(buf, 80);
-		char dst[4][40] = { 0 };
+		char dst[10][80] = { 0 };
 		int len = split(dst, buf, " ");
 		if (0 == strcmp(dst[0], "ls"))
 		{
+			char path[2] = ".";
 			if (-1 == dir(path, "*.sml"))
 			{
 				puts("NO .sml FILE FOUND ON CURRENT DIRECTORY.");
@@ -155,8 +160,8 @@ void console()
 		}
 		else if (0 == strcmp(dst[0], "load"))
 		{
-			load_file(dst[1]);
-			runSML();
+			if (!load_file(dst[1]))
+				runSML();
 		}
 		else if (0 == strcmp(dst[0], "exit"))
 		{
@@ -166,8 +171,8 @@ void console()
 		}
 		else if (0 == strcmp(dst[0], "input"))
 		{
-			input_code();
-			runSML();
+			if (input_code()>0)
+				runSML();
 		}
 		else if (0 == strcmp(dst[0], "dump"))
 		{
