@@ -1,4 +1,16 @@
 #sml_v3 更新说明
+
+ADDED INSTRUCTION: 
+- SET, ASSIGN CONSTANT TO ADDER
+- MOD, ADDER MOD MEM NUMBER, RESULT IN ADDER
+- INC, ++
+- DEC, --
+- NEG, -
+- AND, 
+- OR,
+- XOR,
+winxos 2016-11-13
+
 - 集成交互式console
 - 支持一些简单交互语句
 - 支持.sml文件导入并运行代码
