@@ -1,0 +1,15 @@
+;it's comment
+;winxos 2016-11-15
+DIM N 101
+DIM I 1
+DIM ANS 0
+.main
+.for
+LOAD ANS
+ADD I
+STORE ANS
+INC I
+LOAD I
+SUB N
+JMPN for
+HALT
