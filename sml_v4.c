@@ -18,10 +18,9 @@ enum
 {
     INPUT = 10, PRINT, LOAD = 20, STORE, SET,
     ADD = 30, SUB, MUL, DIV, MOD, INC, DEC, NEG,
-    JMP = 40, JMPN, JMPZ,
+    JMP = 40, JMPN, JMPZ, HALT,
     AND = 50, OR, XOR,
-    PUSH = 60, POP,
-    HALT = -1
+    PUSH = 60, POP
 };
 
 #define COLS 10
@@ -115,10 +114,14 @@ int input_code()
     printf("\nEnter -1 to end input.\n\n");
     int ct = 0, li = 0;
     memset(MEM, 0, sizeof(int) * MAX_MEM);
-    while (ct != -1)
+    while (1)
     {
         printf("%02d ? ", li);
         scanf("%d", &ct);
+        if (ct == -1)
+        {
+            break;
+        }
         MEM[li++] = ct;
     }
     return li - 1;
@@ -174,7 +177,7 @@ int load_file(char file[80])//load .sml file to MEM
 
 void help()
 {
-    printf("THIS MACHINE HAVE %d(int)MEMORY, %d(int)STACK\n",MAX_MEM,MAX_STACK);
+    printf("THIS MACHINE HAVE %d(int)MEMORY, %d(int)STACK\n", MAX_MEM, MAX_STACK);
     puts("INSTRUCTION IS 4 DECIMAL DIGITS, FORMAT: AABB");
     puts("AA IS OPERATOR, BB IS OPERAND");
     puts("ONLY HAVE ONE REGISTER\n");
