@@ -1,5 +1,11 @@
 # coding:utf-8
+# SIMPLE ASSEMBLY LANGUAGE V1
+# ASSEMBLY SAL FILE TO SAL FOR SML
+# PYTHON 3.5
 # winxos 2016-11-15
+import glob
+import sys, os
+
 keywords = {"INPUT": 10, "PRINT": 11,
             "LOAD": 20, "STORE": 21, "SET": 22,
             "ADD": 30, "SUB": 31, "MUL": 32, "DIV": 33, "MOD": 34, "INC": 35, "DEC": 36, "NEG": 37,
@@ -14,7 +20,6 @@ label_table = {}
 
 def pretranslate(src_code):
     after_code = []
-    # after_code.append(["JMP", "main"])
     for line in src_code:
         cmds = str(line).split()
         if len(cmds) > 0:
@@ -26,7 +31,6 @@ def pretranslate(src_code):
                         print("[error] VAR %s ALREADY DEFINED." % cmds[1])
                         return
                     var_table[cmds[1]] = cmds[2]
-
             elif cmds[0].startswith("."):  # label
                 if cmds[0] in label_table:
                     print("[error] LABEL %s ALREADY DEFINED." % cmds[0])
@@ -38,11 +42,8 @@ def pretranslate(src_code):
                 after_code.append(cmds)
 
     for i, n in enumerate(var_table):
-        after_code.append(int(var_table[n]))
+        after_code.append(var_table[n])
         var_table[n] = len(after_code) - 1
-    print(var_table)
-    print(label_table)
-    print(after_code)
     return after_code
 
 
@@ -72,14 +73,44 @@ def translate(codes):
                     print("[error] VAR %s NOT FOUND." % code[1])
                     return;
             else:
-                if code[0] == "HALT":
+                if code[0] == "HALT" or code[0] == "PUSH" or code[0] == "POP":
                     pass
                 else:
                     print("[waring] LINE % MISS OPERAND." % index)
-        ml.append(operator * 100 + operand)
-    print(ml)
-    return ml
+        ml.append("%02d%02d" % (operator, operand))
+    return ("\n").join(ml)
 
 
-codes = open("sum.sal").read().split("\n")
-translate(pretranslate(codes))
+def deal_sal(n):
+    fn = str(n).split(".")[0] + ".sml"
+    try:
+        with open(n) as fi, open(fn, "w") as fo:
+            fo.write(translate(pretranslate(fi.read().split("\n"))))
+            print("[success] ASSEMBLY FILE %s TO %s" % (n, fn))
+    except IOError as e:
+        print("[error] %s" % str(e))
+
+
+def console():
+    print("WELCOME TO SIMPLE ASSEMBLER v1")
+    print("\t\twinxos 2016-11-15")
+    print("\n")
+    print("ls\t\t[list .sal assembly file]")
+    print("as file\t\t[assembly .sal file to .sml file]")
+    print("exit\t\t[exit program]")
+    while True:
+        cmd = str(input("SAL >"))
+        cmds = cmd.split(" ")
+        if cmds[0] == "ls":
+            print("\n".join(glob.glob(r"*.sal")))
+        if cmds[0] == "as":
+            deal_sal(cmds[1])
+        if cmds[0] == "exit":
+            sys.exit()
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        deal_sal(sys.argv[1])
+    else:
+        console()

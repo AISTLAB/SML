@@ -1,0 +1,27 @@
+;decimal to binary convert
+;winxos 2016-11-15
+DIM N
+DIM A 2
+DIM L
+DIM I
+.main
+INPUT N
+.for
+LOAD N
+MOD A
+PUSH
+INC L
+LOAD N
+DIV A
+STORE N
+JMPZ next
+JMP for
+.next
+POP
+STORE N
+PRINT N
+INC I
+LOAD I
+SUB L
+JMPN next
+HALT
