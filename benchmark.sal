@@ -1,0 +1,20 @@
+;vm benchmark
+;winxos 2016-11-18
+DIM C 9999
+DIM N 9999
+DIM M 9999
+.main
+.for1
+LOAD N
+DEC N
+JMPZ for2
+JMP for1
+.for2
+LOAD M
+DEC M
+JMPZ end
+LOAD C
+STORE N
+JMP for1
+.end
+HALT
