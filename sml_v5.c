@@ -9,16 +9,16 @@ winxos 2016-11-14
 #include <stdlib.h>
 #include <string.h>
 #include <io.h>
-#include <time.h>
 #include <windows.h>
 
 #define MAX_MEM 100
 int MEM[MAX_MEM] = {0}, ADDER = 0; //ONLY MAX_MEN MEMORY, ONE REGISTER ADDER
 #define MAX_STACK 30
 int STACK[MAX_STACK] = {0};
+
 enum
 {
-    GET = 10, PRINT, LOAD = 20, STORE, SET,
+    _INPUT = 10, PRINT, LOAD = 20, STORE, SET,
     ADD = 30, SUB, MUL, DIV, MOD, INC, DEC, NEG,
     JMP = 40, JMPN, JMPZ, HALT,
     AND = 50, OR, XOR,
@@ -48,12 +48,16 @@ void dump() //Pretty Show Memory For Debugging
     }
     puts("\n");
 }
-int operand = 0, pcode = 0, pstack = 0;
+
+int operand, pcode, pstack;
+long total_instructions;
+
 void init_SML()
 {
-    operand = 0, pcode = 0, pstack = 0;
+    operand = 0, pcode = 0, pstack = 0, total_instructions = 0;
     memset(MEM, 0, sizeof(int) * MAX_MEM);
 }
+
 int step_SML() //
 {
     if (pcode < MAX_MEM)
@@ -62,7 +66,7 @@ int step_SML() //
         operand = MEM[pcode] % 100;
         switch (op)
         {
-        case GET:printf("GET:");
+        case _INPUT:printf("INPUT:");
             scanf("%d", &MEM[operand]);
             break;
         case PRINT:printf("%d ", MEM[operand]);
@@ -101,14 +105,15 @@ int step_SML() //
             break;
         case XOR:ADDER = ADDER ^ MEM[operand];
             break;
-        case PUSH:pstack < MAX_STACK ? STACK[pstack++] = ADDER : puts("STACK OVERFLOW.");
+        case PUSH:pstack < MAX_STACK ? STACK[pstack++] = ADDER : puts("[warning] STACK OVERFLOW.");
             break;
-        case POP:pstack > 0 ? ADDER = STACK[--pstack] : puts("STACK EMPTY.");
+        case POP:pstack > 0 ? ADDER = STACK[--pstack] : puts("[warning] STACK EMPTY.");
             break;
         case HALT: pcode = MAX_MEM;
             break;
         default:break;
         }
+        pcode++;
     }
     else
     {
@@ -117,20 +122,46 @@ int step_SML() //
     }
     return 0;
 }
+
+long FREQ = 160000;
+
 void runSML()
 {
-    LARGE_INTEGER t1,t2,feq;
-    QueryPerformanceFrequency(&feq);//每秒跳动次数,windows下ns级精度
-    QueryPerformanceCounter(&t1);//测前跳动次数
-    while(!step_SML())
+    long COUNT_LINE_DET = (FREQ / 1000); //0.1% precision
+    if (COUNT_LINE_DET < 1)
     {
-        pcode++;
+        COUNT_LINE_DET = 1;
     }
-    QueryPerformanceCounter(&t2);//测后跳动次数
-    double d=((double)t2.QuadPart-(double)t1.QuadPart)/((double)feq.QuadPart);//时间差秒
-    printf("time used:%f s.",d);
+    double det, det_time = COUNT_LINE_DET / (double) FREQ;
+
+    LARGE_INTEGER st, t1, t2, feq;
+    QueryPerformanceFrequency(&feq);//freq per second, windows precision < us
+    QueryPerformanceCounter(&st);//starter counter
+    t1 = st;
+    int counter = 0;
+    while (1)
+    {
+        total_instructions++;
+        if (step_SML())
+            break;
+        counter++;
+        if (counter >= COUNT_LINE_DET)
+        {
+            counter = 0;
+            do
+            {
+                QueryPerformanceCounter(&t2);
+                det = ((double) t2.QuadPart - (double) t1.QuadPart) / ((double) feq.QuadPart);//counter timer
+            } while (det < det_time);
+            QueryPerformanceCounter(&t1);
+        }
+    }
+    QueryPerformanceCounter(&t2);//
+    det = ((double) t2.QuadPart - (double) st.QuadPart) / ((double) feq.QuadPart);//total seconds
+    printf("Total run %ld instructions, time used:%f s.\n", total_instructions, det);
     dump();
 }
+
 int input_code()
 {
     printf("\nEnter -1 to end input.\n\n");
@@ -191,7 +222,7 @@ int load_file(char file[80])//load .sml file to MEM
     }
     else
     {
-        printf("%s NOT FOUND.", file);
+        printf("[error] %s NOT FOUND.", file);
         return -1;
     }
     return 0;
@@ -204,7 +235,7 @@ void help()
     puts("AA IS OPERATOR, BB IS OPERAND");
     puts("ONLY HAVE ONE REGISTER\n");
     puts("INSTRUCTIONS:");
-    puts("\tGET:10\tPRINT:11\tLOAD:20\tSTORE:21\tSET:22");
+    puts("\tINPUT:10\tPRINT:11\tLOAD:20\tSTORE:21\tSET:22");
     puts("\tADD:30\tSUB:31\tMUL:32\tDIV:33\tMOD:34\tINC:35\tDEC:36\tNEG:37");
     puts("\tJMP:40\tJMPN:41\tJMPZ:42");
     puts("\tAND:50\tOR:51\tXOR:52");
@@ -215,8 +246,10 @@ void help()
     puts("help | ? \t\t[help]");
     puts("load name.sml\t\t[load and run source code]");
     puts("input\t\t\t[open code input mode]");
+    puts("freq 100000\t\t[set running frequency to 100K Hz]");
     puts("exit\t\t\t[exit program]");
-    puts("dump\t\t\t[show memories]");
+    puts("dump\t\t\t[show memories]\n");
+    printf("RUNNING FREQUENCY IS %ld Hz\n", FREQ);
 }
 
 void console()
@@ -234,7 +267,7 @@ void console()
             char path[2] = ".";
             if (-1 == dir(path, "*.sml"))
             {
-                puts("NO .sml FILE FOUND ON CURRENT DIRECTORY.");
+                puts("[error] NO .sml FILE FOUND ON CURRENT DIRECTORY.");
             }
         }
         else if (0 == strcmp(dst[0], "help") || 0 == strcmp(dst[0], "?"))
@@ -259,6 +292,16 @@ void console()
             if (input_code() > 0)
                 runSML();
         }
+        else if (0 == strcmp(dst[0], "freq"))
+        {
+            FREQ = atoi(dst[1]);
+            if (FREQ < 1)
+            {
+                FREQ = 1;
+                puts("[warning] Frequency value invalid.");
+            }
+            printf("Frequency set to %ld\n", FREQ);
+        }
         else if (0 == strcmp(dst[0], "dump"))
         {
             dump();
@@ -270,8 +313,8 @@ void console()
 
 int main()
 {
-    puts("\tSimple Machine Language Simulator v4.0");
-    puts("\t\t\twinxos 2016/11/14\n");
+    puts("\tSimple Machine Language Simulator v5.0");
+    puts("\t\t\twinxos 2016/11/18\n");
     help();
     console();
     return 0;
