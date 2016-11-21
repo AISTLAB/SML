@@ -1,0 +1,6 @@
+{
+  "name": "Simulation of CPU",
+  "tagline": "Practice of Virtual Machine",
+  "body": "# Welcome to SML Pages.\r\nThis project maintain a Virtual Machine mainly using C Language, Our purpose are creating a minimal Virtual Machine for:\r\n\r\n- ##Teaching students\r\n  1. How cpu works\r\n  2. How **assembly language** turns into **machine language**\r\n  3. How **high level language** turns into **assembly language**\r\n  4. Why algorithm is so important, and How to **write effective code step by step**\r\n\r\n- ##Using for production\r\n\r\n  1. Finally we want portable the code to the Mainly embedded platform, **89C51**, **Arduino**, **STM32F103**, **Raspberry Pi**, **Web Service**,etc, so we can realize \"programming once, run every where\".\r\n\r\n  2. The benifit is the newcomer can migrate their experience discard the complex detail of the hardware.\r\n\r\n\r\n\r\n# Project progress\r\n\r\nSML_V5\r\n\r\nSAL_V1\r\n\r\n*2016-11-21*\r\n\r\n\r\n\r\n# Authors and Contributors\r\n\r\n@winxos\r\n\r\n@aistlab\r\n\r\n# Support or Contact\r\n\r\n<info@aistlab.com>\r\n\r\n<winxos@hotmail.com>\r\n\r\n<aistlab@hotmail.com>\r\n\r\n*2016-11-21*\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
